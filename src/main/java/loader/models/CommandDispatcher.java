@@ -2,6 +2,7 @@ package loader.models;
 
 import loader.models.annotations.Command;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -9,17 +10,25 @@ import java.util.Objects;
 public record CommandDispatcher(Controller controller) {
     // private List<String> commandsss;
 
-    public void executeCommand(String commandLine) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        String command = commandLine.substring(0, commandLine.indexOf(' ') - 1);
+    public void executeCommand(String commandLine) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, IOException {
+        String command;
+        String params;
+        if(commandLine.indexOf(' ') == -1) {
+            command = commandLine;
+            params = null;
+        } else {
+            command = commandLine.substring(0, commandLine.indexOf(' '));
+            params = commandLine.substring(commandLine.indexOf(' ') + 1);
+        }
         Method method = getAnnotatedMethod(command);
         if (method == null) {
-            throw new NoSuchMethodException();
+            throw new NoSuchMethodException("There is no method like this");
         }
-        String params = commandLine.substring(commandLine.indexOf(' ') + 1);
-        if (params.length() == 0) {
-            params = null;
+        if (params == null) {
+            method.invoke(controller);
+        } else {
+            method.invoke(controller, params);
         }
-        method.invoke(controller, params);
 
         // commandsss = List.of(commandLine.split("\\s+"));
         /*switch (commandsss.get(0)) {

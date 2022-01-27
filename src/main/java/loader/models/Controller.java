@@ -2,6 +2,7 @@ package loader.models;
 
 import loader.models.annotations.Command;
 
+import java.io.IOException;
 import java.util.List;
 
 public record Controller(FileDownloader fd) {
@@ -23,7 +24,7 @@ public record Controller(FileDownloader fd) {
     }
 
     @Command("/dest")
-    void dest(String path) {
+    void dest(String path) throws IOException {
         fd.dest(path);
     }
 
