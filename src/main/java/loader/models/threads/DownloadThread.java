@@ -31,7 +31,8 @@ public record DownloadThread(String link, String path) implements Runnable {
             raf.close();
             System.out.println("Download complete");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 }

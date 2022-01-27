@@ -29,6 +29,8 @@ public class Main {
                 System.out.println("There is no such annotated method");
             } catch (IllegalAccessException | InvocationTargetException ex) {
                 System.out.println(ex.getMessage());
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
             } finally {
                 fd.flush();
             }
