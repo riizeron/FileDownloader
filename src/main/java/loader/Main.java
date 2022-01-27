@@ -4,10 +4,11 @@ import loader.models.CommandDispatcher;
 import loader.models.Controller;
 import loader.models.FileDownloader;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Scanner;
 
 public class Main {
-    static final Scanner scanner = new Scanner(System.in);
+    private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
         System.out.println("""
@@ -22,7 +23,15 @@ public class Main {
             System.out.println("Current download destination is " + fd.getPath());
             System.out.print(fd.getPath() + ">");
             command = scanner.nextLine();
-            cd.executeCommand(command);
+            try {
+                cd.executeCommand(command);
+            } catch (NoSuchMethodException ex) {
+                System.out.println("There is no such annotated method");
+            } catch (IllegalAccessException | InvocationTargetException ex) {
+                System.out.println(ex.getMessage());
+            } finally {
+                fd.flush();
+            }
         }
     }
 }

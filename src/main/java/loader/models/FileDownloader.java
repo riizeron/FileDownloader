@@ -2,7 +2,6 @@ package loader.models;
 
 import loader.models.threads.DownloadThread;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,19 +22,13 @@ public class FileDownloader {
     }
 
     public void loadAll(List<String> strUrls) {
-        try {
-            for (var strUrl : strUrls) {
-                load(strUrl);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            pool.shutdown();
+        for (var strUrl : strUrls) {
+            load(strUrl);
         }
     }
 
-    private void load(String link) throws IOException {
-        pool.execute(new DownloadThread(link));
+    private void load(String link) {
+        pool.execute(new DownloadThread(link, path));
     }
 
     public void dest(String path) {
@@ -44,6 +37,7 @@ public class FileDownloader {
 
     public void flush() {
         isEnd = true;
+        pool.shutdown();
     }
 
     public String getPath() {

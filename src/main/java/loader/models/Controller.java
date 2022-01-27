@@ -12,7 +12,8 @@ public record Controller(FileDownloader fd) {
     }
 
     @Command("/load")
-    void load(List<String> urls) {
+    void load(String strUrl) {
+        List<String> urls = List.of(strUrl.split("\\s+"));
         fd.loadAll(urls);
     }
 
