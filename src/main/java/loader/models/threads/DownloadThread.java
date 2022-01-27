@@ -1,31 +1,42 @@
 package loader.models.threads;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
+import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class DownloadThread implements Runnable {
-    private final URLConnection connection;
-    private final RandomAccessFile raf;
-    public static AtomicLong process;
 
-    public DownloadThread(URLConnection connection, RandomAccessFile raf) {
-        this.connection = connection;
-        this.raf = raf;
+    public static AtomicLong process;
+    private final String link;
+
+    public DownloadThread(String link) {
+        this.link = link;
     }
 
     @Override
     public void run() {
         try {
+            String fileName = link.substring(link.lastIndexOf('/') + 1).trim();
+            RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
+
+            URL url = new URL(link);
+            URLConnection connection = url.openConnection();
+            double fileSize = connection.getContentLength();
             InputStream is = connection.getInputStream();
-            byte[] buffer = new byte[2 ^ 20];
+
+            double downloaded = 0.00;
+            double percent = 0.00;
+            byte[] buffer = new byte[2 ^ 10];
             int len = -1;
             while ((len = is.read(buffer)) != -1) {
                 raf.write(buffer, 0, len);
+                downloaded += len;
+                percent = (downloaded*100) / fileSize;
+                System.out.println("Downloaded " + String.format("%.4f", percent) + "% of file");
             }
             raf.close();
+            System.out.println("Download complete");
         } catch (IOException e) {
             e.printStackTrace();
         }

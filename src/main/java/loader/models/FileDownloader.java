@@ -3,9 +3,6 @@ package loader.models;
 import loader.models.threads.DownloadThread;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,6 +10,7 @@ import java.util.concurrent.Executors;
 public class FileDownloader {
     private Boolean isEnd = false;
     private String path = System.getProperty("user.dir");
+    private final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public final void help() {
         System.out.println("""
@@ -25,38 +23,19 @@ public class FileDownloader {
     }
 
     public void loadAll(List<String> strUrls) {
-        URLConnection connection;
         try {
             for (var strUrl : strUrls) {
-                connection = new URL(strUrl).openConnection();
-                load(connection);
+                load(strUrl);
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            pool.shutdown();
         }
     }
 
-    private void load(URLConnection connection) throws IOException {
-        int threadAmount = Runtime.getRuntime().availableProcessors();
-        ExecutorService pool = Executors.newFixedThreadPool(threadAmount);
-        int wholeLen = connection.getContentLength()/threadAmount;
-        int eachLen = wholeLen/threadAmount;
-        String fileName = "ну типа";
-        for (int i = 0; i < threadAmount; i++) {
-            long start = (long) eachLen * i;
-            long end = (long) eachLen * (i + 1);
-            if (i == threadAmount - 1) end = Math.max(end, wholeLen);
-
-            connection.setRequestProperty("Range", "bytes=" + String.valueOf(start) + "-" + String.valueOf(end));
-            connection.connect();
-
-            String suff = ".";
-
-            RandomAccessFile raf = new RandomAccessFile(fileName + suff, "rw");
-            raf.seek(start);    // Поток файла в соответствующее местоположение
-
-            pool.submit(new DownloadThread(connection, raf));
-        }
+    private void load(String link) throws IOException {
+        pool.execute(new DownloadThread(link));
     }
 
     public void dest(String path) {
