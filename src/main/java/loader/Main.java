@@ -1,7 +1,7 @@
 package loader;
 
 import loader.models.CommandDispatcher;
-import loader.models.Controller;
+import loader.models.controllers.Controller;
 import loader.models.FileDownloader;
 
 import java.io.IOException;

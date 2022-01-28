@@ -31,7 +31,7 @@ public record DownloadThread(String link, String path) implements Runnable {
             raf.close();
             System.out.println("Download complete");
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Incorrect path");
             throw new RuntimeException(e);
         }
     }

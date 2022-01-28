@@ -1,5 +1,6 @@
-package loader.models;
+package loader.models.controllers;
 
+import loader.models.FileDownloader;
 import loader.models.annotations.Command;
 
 import java.io.IOException;
@@ -27,5 +28,4 @@ public record Controller(FileDownloader fd) {
     void dest(String path) throws IOException {
         fd.dest(path);
     }
-
 }

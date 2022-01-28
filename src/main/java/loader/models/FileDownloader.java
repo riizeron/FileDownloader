@@ -36,7 +36,7 @@ public class FileDownloader {
         pool.execute(new DownloadThread(link, path));
     }
 
-    public void dest(String path) throws IOException {
+    public void dest(String path) {
         if (Files.isDirectory(Path.of(path))) {
             this.path = path;
             System.out.println("You currently change the direct path");
@@ -64,5 +64,9 @@ public class FileDownloader {
 
     public Boolean isEnd() {
         return isEnd;
+    }
+
+    public Boolean isPoolShutdown() {
+        return pool.isShutdown();
     }
 }
