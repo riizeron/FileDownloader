@@ -10,7 +10,7 @@ class CommandDispatcherTest {
 
     @Test
     void executeCommandWithIncorrectAnnotationShouldThrowsNoSuchMethodException() {
-        CommandDispatcher cd = new CommandDispatcher(new Controller(new FileDownloader()));
+        CommandDispatcher cd = new CommandDispatcher(new FileDownloader());
         assertThrows(NoSuchMethodException.class, () -> cd.executeCommand("dfhasfgf"));
     }
 }

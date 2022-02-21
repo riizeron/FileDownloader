@@ -3,3 +3,4 @@ target
 ..gitignore.un~
 .gitignore.swp
 .gitignore~
+*.jpg

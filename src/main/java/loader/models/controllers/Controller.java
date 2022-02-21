@@ -1,31 +1,30 @@
 package loader.models.controllers;
 
-import loader.models.FileDownloader;
 import loader.models.annotations.Command;
+import loader.models.interfaces.Loader;
 
 import java.io.IOException;
-import java.util.List;
 
-public record Controller(FileDownloader fd) {
+public record Controller(Loader loader) {
 
     @Command("/help")
     void help() {
-        fd.help();
+        loader.help();
     }
 
     @Command("/load")
     void load(String strUrl) {
-        List<String> urls = List.of(strUrl.split("\\s+"));
-        fd.loadAll(urls);
+        //List<String> urls = List.of(strUrl.split("\\s+"));
+        loader.load(strUrl);
     }
 
     @Command("/exit")
     void exit() {
-        fd.flush();
+        loader.exit();
     }
 
     @Command("/dest")
     void dest(String path) throws IOException {
-        fd.dest(path);
+        loader.dest(path);
     }
 }

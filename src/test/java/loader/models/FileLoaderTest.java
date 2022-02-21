@@ -5,11 +5,14 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class FileDownloaderTest extends TestCase {
+import static org.junit.Assert.assertThrows;
+
+public class FileLoaderTest extends TestCase {
 
     static FileDownloader fd;
     @BeforeAll
@@ -18,7 +21,7 @@ public class FileDownloaderTest extends TestCase {
     }
     @AfterAll
     public static void endOff() {
-        fd.flush();
+        fd.exit();
     }
     /**
      * Это че еще за высер джупитер винтаж а??
@@ -28,8 +31,8 @@ public class FileDownloaderTest extends TestCase {
     public void loadAllOnCorrectPathShouldSaveFiles() {
         String link1 = "https://wallpaper-mania.com/wp-content/uploads/2018/09/High_resolution_wallpaper_background_ID_77700212191.jpg";
         String link2 = "https://i.ytimg.com/vi/22mb8TAKTIk/maxresdefault.jpg";
-        List<String> urls = List.of(new String[]{link1, link2});
-        fd.loadAll(urls);
+        //List<String> urls = List.of(new String[]{link1, link2});
+        fd.load(String.join(" ", link1, link2));
         String fileName1 = link1.substring(link1.lastIndexOf('/')).trim();
         String fileName2 = link2.substring(link2.lastIndexOf('/')).trim();
         assertTrue(Files.exists(Path.of(fd.getPath() + System.getProperty("file.separator")+ fileName1))
@@ -45,14 +48,23 @@ public class FileDownloaderTest extends TestCase {
     @Test
     public void destOnIncorrectPathShouldntChangePath() {
         String path1 = fd.getPath();
+        try {
         fd.dest("incorectPath");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         String path2 = fd.getPath();
         assertEquals(path1, path2);
     }
 
     @Test
+    public void destOnIncorrectPathShouldThrowIOException() {
+        assertThrows(IOException.class, () -> fd.dest("incorrectPath"));
+    }
+
+    @Test
     public void flushShouldShutThePool() {
-        fd.flush();
+        fd.exit();
         assertTrue(fd.isPoolShutdown());
     }
 }

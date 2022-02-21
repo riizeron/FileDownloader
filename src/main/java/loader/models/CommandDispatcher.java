@@ -1,53 +1,58 @@
 package loader.models;
 
 import loader.models.annotations.Command;
+import loader.models.interfaces.Loader;
+import org.reflections.ReflectionUtils;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
-public record CommandDispatcher(Controller controller) {
-    // private List<String> commandsss;
+public class CommandDispatcher {
+
+    private final Loader loader;
+    private final Map<String, Method> methodHashMap = new HashMap<>();
+    private Method defaultMethod;
+
+    public CommandDispatcher(Loader loader) {
+        Objects.requireNonNull(loader);
+        this.loader = loader;
+
+        for (Method method : ReflectionUtils.getAllMethods(loader.getClass())) {
+            Command command = method.getAnnotation(Command.class);
+            if (command != null) {
+                String commandId = command.value();
+                if (commandId.isEmpty()) {
+                    defaultMethod = method;
+                } else {
+                    methodHashMap.put(commandId, method);
+                }
+            }
+        }
+    }
 
     public void executeCommand(String commandLine) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, IOException {
         String command;
         String params;
-        if(commandLine.indexOf(' ') == -1) {
+
+        if (commandLine.indexOf(' ') == -1) {
             command = commandLine;
             params = null;
         } else {
             command = commandLine.substring(0, commandLine.indexOf(' '));
             params = commandLine.substring(commandLine.indexOf(' ') + 1);
         }
-        Method method = getAnnotatedMethod(command);
+        Method method = methodHashMap.getOrDefault(command, defaultMethod);
         if (method == null) {
-            throw new NoSuchMethodException("There is no method like this");
+            throw new NoSuchMethodException("There is no such annotated method");
         }
         if (params == null) {
-            method.invoke(controller);
+            method.invoke(loader);
         } else {
-            method.invoke(controller, params);
+            method.invoke(loader, params);
         }
-
-        // commandsss = List.of(commandLine.split("\\s+"));
-        /*switch (commandsss.get(0)) {
-            case "/help" -> controller.help();
-            case "/exit" -> controller.exit();
-            case "/load" -> controller.load(commandsss.subList(1, commandsss.size()));
-            case "/dest" -> controller.dest(String.join(" ", commandsss.subList(1, commandsss.size())));
-        }*/
-    }
-
-    private Method getAnnotatedMethod(String command) {
-        for (Method method : controller.getClass().getDeclaredMethods()) {
-            if (method.isAnnotationPresent(Command.class)) {
-                if (Objects.equals(method.getAnnotation(Command.class).value(), command)) {
-                    method.setAccessible(true);
-                    return method;
-                }
-            }
-        }
-        return null;
     }
 }

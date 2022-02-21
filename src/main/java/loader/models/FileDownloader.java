@@ -1,16 +1,18 @@
 package loader.models;
 
+import loader.models.interfaces.Loader;
 import loader.models.threads.DownloadThread;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class FileDownloader {
+public class FileDownloader implements Loader {
     private Boolean isEnd = false;
     private String path = System.getProperty("user.dir");
     private final ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -26,27 +28,28 @@ public class FileDownloader {
                 Current download destination is""" + " " + getPath());
     }
 
-    public void loadAll(List<String> strUrls) {
+    public void load(String urls) {
+        List<String> strUrls = Arrays.stream(urls.split("\s+")).toList();
         for (var strUrl : strUrls) {
-            load(strUrl);
+            loadElem(strUrl);
         }
     }
 
-    private void load(String link) {
+    private void loadElem(String link) {
         pool.execute(new DownloadThread(link, path));
     }
 
-    public void dest(String path) {
+    public void dest(String path) throws IOException {
         if (Files.isDirectory(Path.of(path))) {
             this.path = path;
             System.out.println("You currently change the direct path");
         } else {
-            // throw new IOException("Wrong directory");
-            System.out.println("Wrong destination directory");
+            throw new IOException("Wrong destination directory");
+            //System.out.println("Wrong destination directory");
         }
     }
 
-    public void flush() {
+    public void exit() {
         isEnd = true;
         pool.shutdown();
         try {
